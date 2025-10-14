@@ -39,7 +39,8 @@ func main() {
 	conn.Signal(c)
 
 	for v := range c {
-		if v.Name == "net.reactivated.Fprint.Device.VerifyStatus" {
+		switch v.Name {
+		case "net.reactivated.Fprint.Device.VerifyStatus":
 			result := v.Body[0].(string)
 			fmt.Printf("Verification status: %s\n", result)
 			var title, message string
@@ -51,6 +52,11 @@ func main() {
 				message = "Authentication failed."
 			}
 			err := beeep.Notify(title, message, "")
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "Failed to send notification:", err)
+			}
+		case "net.reactivated.Fprint.Device.VerifyFingerSelected":
+			err := beeep.Notify("👆 Fingerprint required", "Waiting for you to touch the sensor.", "")
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "Failed to send notification:", err)
 			}
